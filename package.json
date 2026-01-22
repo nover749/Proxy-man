@@ -1,13 +1,10 @@
 {
   "name": "web-proxy-app",
   "version": "1.0.0",
-  "description": "Standalone HTML app with matrix background and Node.js proxy for in-app browsing",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
