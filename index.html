@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Welcome</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<link id="favicon" rel="icon">
+<style>
+*{box-sizing:border-box;font-family:monospace;}
+html,body{margin:0;height:100%;background:black;overflow:hidden;}
+canvas{position:fixed;inset:0;z-index:0;}
+
+.topbar{
+  position:fixed;top:0;width:100%;z-index:10;
+  display:flex;gap:6px;padding:8px;
+  background:rgba(0,0,0,.85);
+}
+.topbar input{
+  flex:1;padding:6px;border:none;border-radius:4px;
+}
+.topbar button{
+  background:transparent;color:white;border:1px solid white;padding:6px 12px;
+}
+
+iframe{
+  position:absolute;
+  top:48px;
+  left:0;
+  width:100%;
+  height:calc(100% - 48px);
+  border:none;
+  background:white;
+  z-index:1;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  z-index:20;
+}
+.modal-content{
+  border:1px solid white;
+  padding:20px;
+  width:90%;
+  max-width:400px;
+  margin:100px auto;
+  color:white;
+}
+.modal-content input,
+.modal-content textarea{
+  width:100%;
+  background:black;
+  color:white;
+  border:1px solid white;
+  padding:6px;
+  margin-bottom:10px;
+}
+textarea{height:80px;resize:none;}
+</style>
+</head>
+
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="topbar">
+  <button onclick="goHome()">Home</button>
+  <input id="url" placeholder="https://example.com">
+  <button onclick="go()">Go</button>
+  <button onclick="settings.style.display='block'">Settings</button>
+</div>
+
+<div class="center" id="home">
+  <h1 id="welcome">Welcome</h1>
+</div>
+
+<iframe id="view"></iframe>
+
+<div class="modal" id="settings">
+  <div class="modal-content">
+    <h2>Settings</h2>
+    <label>Website Title</label>
+    <input id="titleInput">
+    <label>Favicon (data:image/...)</label>
+    <textarea id="faviconInput"></textarea>
+    <button onclick="save()">Save</button>
+    <button onclick="settings.style.display='none'">Close</button>
+  </div>
+</div>
+
+<script>
+const PROXY = "http://localhost:3000/proxy?url=";
+const HOMEPAGE = "https://example.com";
+
+const iframe = document.getElementById("view");
+const urlInput = document.getElementById("url");
+const homeEl = document.getElementById("home");
+
+function load(u){
+  if(!u.startsWith("http")) u = "https://" + u;
+  iframe.src = PROXY + encodeURIComponent(u);
+  homeEl.style.display = "none";
+}
+
+function go(){
+  if(!urlInput.value.trim()) return;
+  load(urlInput.value.trim());
+}
+
+function goHome(){
+  urlInput.value = HOMEPAGE;
+  load(HOMEPAGE);
+}
+
+/* Load homepage on first open */
+window.onload = () => goHome();
+
+/* Settings */
+function save(){
+  if(titleInput.value){
+    localStorage.title = titleInput.value;
+    document.title = titleInput.value;
+    welcome.innerText = titleInput.value;
+  }
+  if(faviconInput.value.startsWith("data:image")){
+    localStorage.favicon = faviconInput.value;
+    favicon.href = faviconInput.value;
+  }
+  settings.style.display = "none";
+}
+
+if(localStorage.title){
+  document.title = localStorage.title;
+  welcome.innerText = localStorage.title;
+}
+if(localStorage.favicon){
+  favicon.href = localStorage.favicon;
+}
+
+/* WHITE MATRIX */
+const c=matrix,ctx=c.getContext("2d");
+function r(){c.width=innerWidth;c.height=innerHeight;}
+r();addEventListener("resize",r);
+let s=14,cols=Math.floor(c.width/s),d=Array(cols).fill(1);
+setInterval(()=>{
+  ctx.fillStyle="rgba(0,0,0,.1)";
+  ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle="white";
+  ctx.font=s+"px monospace";
+  d.forEach((y,i)=>{
+    ctx.fillText("01"[Math.random()*2|0],i*s,y*s);
+    d[i]=y*s>c.height&&Math.random()>.98?0:y+1;
+  });
+},33);
+</script>
+
+</body>
+</html>
